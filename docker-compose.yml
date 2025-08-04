@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:17
+    restart: always
+    container_name: tdg_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/usuarios.csv:/docker-entrypoint-initdb.d/usuarios.csv
+      - ./db/Datos_Personales_usr.csv:/docker-entrypoint-initdb.d/Datos_Personales_usr.csv
+      - ./db/redes.csv:/docker-entrypoint-initdb.d/redes.csv
+      - ./db/Lideres.csv:/docker-entrypoint-initdb.d/Lideres.csv
+      - ./db/D_Lider_HIST.csv:/docker-entrypoint-initdb.d/D_Lider_HIST.csv
+      - ./db/codigos_postales.csv:/docker-entrypoint-initdb.d/codigos_postales.csv
+
+volumes:
+  pgdata:
