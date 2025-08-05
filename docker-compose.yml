@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -19,7 +19,7 @@ services:
       - ./db/redes.csv:/docker-entrypoint-initdb.d/redes.csv
       - ./db/Lideres.csv:/docker-entrypoint-initdb.d/Lideres.csv
       - ./db/D_Lider_HIST.csv:/docker-entrypoint-initdb.d/D_Lider_HIST.csv
-      - ./db/codigos_postales.csv:/docker-entrypoint-initdb.d/codigos_postales.csv
+     # - ./db/codigos_postales.csv:/docker-entrypoint-initdb.d/codigos_postales.csv
 
 volumes:
   pgdata:
