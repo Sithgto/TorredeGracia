@@ -157,6 +157,8 @@ CREATE OR REPLACE VIEW vista_usuarios_cumpleanos_lider AS
 SELECT 
     u.Nombre AS NombreUsuario,
     l.nombre AS NombreLider,
+    l.id_lider,
+    d.telefono ,
     d.dia,
     d.mes,
     dlh.fechadatos,
@@ -229,6 +231,76 @@ JOIN lideres lp ON dlh.id_liderpral = lp.id_lider
 
 WHERE dlh.id_estado <> 2
 ORDER BY dlh.id_lider, dlh.fechadatos DESC;
+
+-- crear vista cumpleanos utilizando las vistas
+CREATE OR REPLACE VIEW vista_cumpleanos AS
+select u.nombreusuario,u.dia, u.mes, u.telefono 
+,v.*
+from vista_lideres_datos_actuales v
+join vista_usuarios_cumpleanos_lider u on v.id_lider = u.id_lider;
+
+-- crea vista cumpleanos mes actual
+CREATE OR REPLACE VIEW vista_cumpleanos_mes_actual AS
+SELECT *
+FROM vista_cumpleanos
+WHERE mes = EXTRACT(MONTH FROM CURRENT_DATE)  order by dia asc;
+
+-- Function: fn_listado_cumplenos_segun_mes
+-- Description: Devuelve el listado de usuarios que cumplen años en el mes especificado
+
+CREATE OR REPLACE FUNCTION fn_listado_cumpleanos_segun_mes(mes_param INTEGER)
+RETURNS TABLE (
+    nombreusuario VARCHAR(100),
+    dia INTEGER,
+    mes INTEGER,
+    telefono VARCHAR(20),
+    id_lider INTEGER,
+    fechadatos DATE,
+    estado VARCHAR(50),
+    rol VARCHAR(50),
+    redtipo VARCHAR(50),
+    nombre_lider_red VARCHAR(100),
+    nombre_sulider VARCHAR(100),
+    nombre_lidersu VARCHAR(100),
+    nombre_lider_principal VARCHAR(100)
+) AS $$
+BEGIN
+    IF mes_param < 1 OR mes_param > 12 THEN
+        RAISE EXCEPTION 'Mes inválido: %', mes_param;
+    END IF;
+
+    RETURN QUERY
+    SELECT 
+        v.nombreusuario,
+        v.dia,
+        v.mes,
+        v.telefono,
+        v.id_lider,
+        v.fechadatos,
+        v.estado,
+        v.rol,
+        v.redtipo,
+        v.nombre_lider_red,
+        v.nombre_sulider,
+        v.nombre_lidersu,
+        v.nombre_lider_principal
+    FROM vista_cumpleanos v
+    WHERE v.mes = mes_param
+    ORDER BY v.dia ASC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- crea la funcion para buscar por nombre de lider
+
+CREATE OR REPLACE FUNCTION fn_buscar_lider_por_nombre(busqueda TEXT)
+RETURNS SETOF vista_lideres_datos_actuales AS $$
+BEGIN
+    RETURN QUERY
+    SELECT *
+    FROM public.vista_lideres_datos_actuales
+    WHERE nombrelider ILIKE '%' || busqueda || '%';
+END;
+$$ LANGUAGE plpgsql;
 
 /*
 -- Crear tabla Codigos_Postales
